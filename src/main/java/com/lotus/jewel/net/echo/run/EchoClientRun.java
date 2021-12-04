@@ -1,6 +1,7 @@
 package com.lotus.jewel.net.echo.run;
 
 import java.lang.reflect.Constructor;
+import java.util.Iterator;
 
 import com.lotus.jewel.client.Client;
 import com.lotus.jewel.client.impl.NettyClient;
@@ -16,9 +17,10 @@ public class EchoClientRun {
 		String ipAddress = "127.0.0.1";
 		int port = 8888;
 		
-		String channelActiveMessage = "Channel Active";
 		Constructor<? extends ChannelInboundHandlerAdapter> handlerConstructor
 			= EchoClientHandler.class.getConstructor(new Class[]{String.class});
+
+		String channelActiveMessage = "Channel Active 🐕";
 		
 		Client client = new NettyClient(ipAddress, port, handlerConstructor, channelActiveMessage);
 		client.start();

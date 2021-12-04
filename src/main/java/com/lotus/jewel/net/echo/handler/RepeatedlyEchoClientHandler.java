@@ -25,8 +25,9 @@ public class RepeatedlyEchoClientHandler extends SimpleChannelInboundHandler<Byt
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
 		if(messageList != null) {
 			for (String message : messageList) {
-				ctx.writeAndFlush(buildMessage(message));
+				ctx.write(buildMessage(message));
 			}
+			ctx.flush();
 		}
     }
 	
@@ -39,19 +40,8 @@ public class RepeatedlyEchoClientHandler extends SimpleChannelInboundHandler<Byt
 	}
 	
 	@Override
-	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-		 if(logger.isDebugEnabled()) {
-        	logger.debug("channelRead");
-        }
-	      
-	}
-	
-	
-	@Override
     public void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
-        if(logger.isDebugEnabled()) {
-        	logger.debug("Client receive : " + msg.toString(CharsetUtil.UTF_8));
-        }
+		logger.debug("Client receive : " + msg.toString(CharsetUtil.UTF_8));
     }
  
     @Override

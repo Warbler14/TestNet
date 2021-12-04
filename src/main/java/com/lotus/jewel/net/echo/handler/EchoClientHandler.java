@@ -36,19 +36,8 @@ public class EchoClientHandler extends SimpleChannelInboundHandler<ByteBuf> {
 	}
 	
 	@Override
-	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-		 if(logger.isDebugEnabled()) {
-        	logger.debug("channelRead");
-        }
-	      
-	}
-	
-	
-	@Override
     public void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
-        if(logger.isDebugEnabled()) {
-        	logger.debug("Client receive : " + msg.toString(CharsetUtil.UTF_8));
-        }
+        logger.debug("Client receive : " + msg.toString(CharsetUtil.UTF_8));
     }
  
     @Override

@@ -35,7 +35,7 @@
     <logger name="com.lotus.jewel.net" level="DEBUG">
         <appender-ref ref="SAMPLE" />
     </logger>
-    <logger name="com.lotus.jewel.net" level="INFO">
+    <logger name="com.lotus.jewel.net" level="DEBUG">
         <appender-ref ref="DAILY_ROLLING_FILE_APPENDER" />
     </logger>
     <root level="DEBUG">
