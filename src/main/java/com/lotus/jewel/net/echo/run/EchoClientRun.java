@@ -1,7 +1,6 @@
 package com.lotus.jewel.net.echo.run;
 
 import java.lang.reflect.Constructor;
-import java.util.Iterator;
 
 import com.lotus.jewel.client.Client;
 import com.lotus.jewel.client.impl.NettyClient;
