@@ -1,5 +1,7 @@
 package com.lotus.jewel.net.echo.handler;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,21 +11,22 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.CharsetUtil;
 
-public class EchoClientHandler extends SimpleChannelInboundHandler<ByteBuf> {
+public class RepeatedlyEchoClientHandler extends SimpleChannelInboundHandler<ByteBuf> {
 	
-	final static Logger logger = LoggerFactory.getLogger(EchoClientHandler.class);
+	final static Logger logger = LoggerFactory.getLogger(RepeatedlyEchoClientHandler.class);
 	
-	private String channelActiveMessage;
+	private List<String> messageList;
 	
-	public EchoClientHandler(String channelActiveMessage) {
-		this.channelActiveMessage = channelActiveMessage;
+	public RepeatedlyEchoClientHandler(List<String> messageList) {
+		this.messageList = messageList;
 	}
 
 	@Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-		if(channelActiveMessage != null) {
-			Object message = buildMessage(channelActiveMessage);
-			ctx.writeAndFlush(message);			
+		if(messageList != null) {
+			for (String message : messageList) {
+				ctx.writeAndFlush(buildMessage(message));
+			}
 		}
     }
 	
