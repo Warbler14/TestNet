@@ -1,12 +1,12 @@
-package com.lotus.jewel.net.echo.run;
+package com.lotus.jewel.client.run;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.lotus.jewel.client.Client;
+import com.lotus.jewel.client.handler.RepeatedlyEchoClientHandler;
 import com.lotus.jewel.client.impl.NettyClient;
-import com.lotus.jewel.net.echo.handler.RepeatedlyEchoClientHandler;
 
 import io.netty.channel.ChannelInboundHandlerAdapter;
 

@@ -1,10 +1,14 @@
-package com.lotus.jewel.net.echo.handler;
+package com.lotus.jewel.client.handler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.lotus.jewel.util.StringUtil;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.CharsetUtil;
@@ -22,22 +26,28 @@ public class EchoClientHandler extends SimpleChannelInboundHandler<ByteBuf> {
 	@Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
 		if(channelActiveMessage != null) {
-			Object message = buildMessage(channelActiveMessage);
+			Object message = StringUtil.stringToByteBuf(channelActiveMessage);
 			ctx.writeAndFlush(message);			
 		}
     }
 	
-	private Object buildMessage(String message) {
-		if(message != null) {
-			return Unpooled.copiedBuffer(message, CharsetUtil.UTF_8);
-		}
-		
-		return null;
-	}
-	
 	@Override
     public void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
         logger.debug("Client receive : " + msg.toString(CharsetUtil.UTF_8));
+        
+        
+        ChannelFuture future = null;
+        future = ctx.writeAndFlush(Unpooled.EMPTY_BUFFER);
+        future.addListener(ChannelFutureListener.CLOSE);
+        
+//        future = ctx.close();
+//        future = ctx.disconnect();
+        
+//        future = ctx.channel().closeFuture();
+//        future.channel().close();
+        
+        
+        
     }
  
     @Override
