@@ -1,4 +1,4 @@
-package com.lotus.jewel.client.run;
+package com.lotus.jewel.run.client;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
