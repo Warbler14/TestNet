@@ -1,12 +1,12 @@
 package com.lotus.jewel.client.impl;
 
-import java.lang.reflect.Constructor;
 import java.net.InetSocketAddress;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.lotus.jewel.client.Client;
+import com.lotus.jewel.wrapper.ClassConstructorWrapper;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
@@ -18,7 +18,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.Future;
 
-public class NettyClient implements Client{
+public class NettyClient <CIHA extends ChannelInboundHandlerAdapter> implements Client{
 	
 	final static Logger logger = LoggerFactory.getLogger(NettyClient.class);
 
@@ -28,23 +28,19 @@ public class NettyClient implements Client{
 	
 	private EventLoopGroup group;
 	
-	private Constructor<? extends ChannelInboundHandlerAdapter> handlerConstructor;
-	
-	public Object hadlerParameter;
+	private ClassConstructorWrapper<CIHA> handlerWrapper;
 	
 	public NettyClient(final String ipAddress, final int port
-			, Constructor<? extends ChannelInboundHandlerAdapter> handlerConstructor
-			, Object hadlerParameter) {
+    		, ClassConstructorWrapper<CIHA> handlerWrapper) {
 		this.ipAddress = ipAddress;
 		this.port = port;
-		this.handlerConstructor = handlerConstructor;
-		this.hadlerParameter = hadlerParameter;
+		this.handlerWrapper = handlerWrapper;
 	}
 	
 	@Override
     public void start() throws Exception {
-		if(handlerConstructor == null) {
-    		throw new Exception("handler is null");
+		if(handlerWrapper == null) {
+    		throw new Exception("handlerWrapper is null");
     	}
 		
         group = new NioEventLoopGroup();
@@ -58,8 +54,10 @@ public class NettyClient implements Client{
                         @Override
                         public void initChannel(SocketChannel channel) throws Exception {
                         	// 채널이 생성될 때 파이프라인에 EchoClientHandler 하나를 추가
-                        	
-                            channel.pipeline().addLast(handlerConstructor.newInstance(hadlerParameter));
+                        	CIHA adapter = handlerWrapper.getInstance();
+                        	if(adapter != null) {       			
+                    			channel.pipeline().addLast(adapter);
+                    		}
                         }
                     });
             ChannelFuture future = bootstrap.connect().sync();   // 원격 피어로 연결하고 연결이 완료되기를 기다림

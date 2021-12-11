@@ -9,7 +9,7 @@ import com.lotus.jewel.server.handler.ChannelGroupServerHandler;
 import com.lotus.jewel.server.handler.EchoServerHandler;
 import com.lotus.jewel.server.handler.ChannelGroupServerHandler.ChannelGroupWrapper;
 import com.lotus.jewel.server.impl.NettyServerWithMultiHandler;
-import com.lotus.jewel.server.impl.NettyServerWithMultiHandler.ChannelInboundHandlerWrapper;
+import com.lotus.jewel.wrapper.ClassConstructorWrapper;
 
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -17,38 +17,41 @@ public class EchoServerWithMultiHandlerRun {
 
 	public static void main(String[] args) throws Exception {
 		int serverPort = 8888;
-		
-		List<ChannelInboundHandlerWrapper> list
-			= new ArrayList<ChannelInboundHandlerWrapper>();
-		
+
+		List<ClassConstructorWrapper<ChannelInboundHandlerAdapter>> list 
+			= new ArrayList<ClassConstructorWrapper<ChannelInboundHandlerAdapter>>();
+
 		appendChannelGroupServerHandler(list);
 		appendEchoServerHandler(list);
-		
-		
-		Server server = new NettyServerWithMultiHandler(serverPort, list);
+
+		Server server = new NettyServerWithMultiHandler<ChannelInboundHandlerAdapter>(serverPort, list);
 		server.start();
 	}
-	
+
 	private static void appendEchoServerHandler(
-			List<ChannelInboundHandlerWrapper> channelInboundHandlerWrapperList) throws Exception{
+			List<ClassConstructorWrapper<ChannelInboundHandlerAdapter>> channelInboundHandlerWrapperList)
+			throws Exception {
 		Constructor<? extends ChannelInboundHandlerAdapter> handlerConstructor
-			= EchoServerHandler.class.getConstructor(new Class[]{Object.class});
-	
-		ChannelInboundHandlerWrapper wrapper = new ChannelInboundHandlerWrapper();
-		wrapper.setHandlerConstructor(handlerConstructor);
-		
+			= EchoServerHandler.class.getConstructor(new Class[] { Object.class });
+
+		ClassConstructorWrapper<ChannelInboundHandlerAdapter> wrapper 
+			= new ClassConstructorWrapper<ChannelInboundHandlerAdapter>();
+		wrapper.setConstructor(handlerConstructor);
+
 		channelInboundHandlerWrapperList.add(wrapper);
 	}
 
 	private static void appendChannelGroupServerHandler(
-			List<ChannelInboundHandlerWrapper> channelInboundHandlerWrapperList) throws Exception{
+			List<ClassConstructorWrapper<ChannelInboundHandlerAdapter>> channelInboundHandlerWrapperList)
+			throws Exception {
 		Constructor<? extends ChannelInboundHandlerAdapter> handlerConstructor
-			= ChannelGroupServerHandler.class.getConstructor(new Class[]{ChannelGroupWrapper.class});
-	
-		ChannelInboundHandlerWrapper wrapper = new ChannelInboundHandlerWrapper();
-		wrapper.setHandlerConstructor(handlerConstructor);
-		wrapper.setHadlerParameter(new ChannelGroupWrapper());
-		
+			= ChannelGroupServerHandler.class.getConstructor(new Class[] { ChannelGroupWrapper.class });
+
+		ClassConstructorWrapper<ChannelInboundHandlerAdapter> wrapper
+			= new ClassConstructorWrapper<ChannelInboundHandlerAdapter>();
+		wrapper.setConstructor(handlerConstructor);
+		wrapper.setParameter(new ChannelGroupWrapper());
+
 		channelInboundHandlerWrapperList.add(wrapper);
 	}
 }

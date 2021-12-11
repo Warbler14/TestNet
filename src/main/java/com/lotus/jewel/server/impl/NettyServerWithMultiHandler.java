@@ -1,6 +1,5 @@
 package com.lotus.jewel.server.impl;
 
-import java.lang.reflect.Constructor;
 import java.net.InetSocketAddress;
 import java.util.List;
 
@@ -8,8 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.lotus.jewel.server.Server;
-import com.lotus.jewel.server.handler.ChannelGroupServerHandler;
-import com.lotus.jewel.server.handler.EchoServerHandler;
+import com.lotus.jewel.wrapper.ClassConstructorWrapper;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -22,7 +20,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.concurrent.Future;
 
-public class NettyServerWithMultiHandler implements Server{
+public class NettyServerWithMultiHandler <CIHA extends ChannelInboundHandlerAdapter> implements Server{
 	
 	final static Logger logger = LoggerFactory.getLogger(NettyServerWithMultiHandler.class);
 
@@ -30,10 +28,10 @@ public class NettyServerWithMultiHandler implements Server{
 	
 	private EventLoopGroup group;
 	
-	private List<ChannelInboundHandlerWrapper> handlerWrapperList;
+	private List<ClassConstructorWrapper<CIHA>> handlerWrapperList;
 	 
     public NettyServerWithMultiHandler(final int port
-    		, List<ChannelInboundHandlerWrapper> channelInboundHandlerWrapperList) {
+    		, List<ClassConstructorWrapper<CIHA>> channelInboundHandlerWrapperList) {
         
     	this.port = port;
         this.handlerWrapperList = channelInboundHandlerWrapperList;
@@ -55,23 +53,16 @@ public class NettyServerWithMultiHandler implements Server{
                         @Override
                         protected void initChannel(SocketChannel channel) throws Exception {
                         	// EchoServerHandler 하나를 채널의 Channel Pipeline 으로 추가
-                            //channel.pipeline().addLast(handler);
-                        	
                         	ChannelPipeline pipeline = channel.pipeline();
                         	
                         	for (int idx = 0; idx < handlerWrapperList.size() ; idx++ ) {
-                        		ChannelInboundHandlerWrapper channelInboundHandlerWrapper = handlerWrapperList.get(idx);
+                        		ClassConstructorWrapper<CIHA> handlerWrapper = handlerWrapperList.get(idx);
                         		
-                        		Constructor<? extends ChannelInboundHandlerAdapter> handlerConstructor 
-                        			= channelInboundHandlerWrapper.getHandlerConstructor();
-                        		Object hadlerParameter = channelInboundHandlerWrapper.getHadlerParameter();
-                        		
-                        		ChannelInboundHandlerAdapter adapter = handlerConstructor.newInstance(hadlerParameter);
-                        		
-                        		pipeline.addLast(String.valueOf(idx), adapter);
-                        		
+                        		CIHA adapter = handlerWrapper.getInstance();
+                        		if(adapter != null) {                    			
+                        			pipeline.addLast(String.valueOf(idx), adapter);
+                        		}
 							}
-                        	
                         }
                     });
             
@@ -109,27 +100,4 @@ public class NettyServerWithMultiHandler implements Server{
 		shutdownGracefully();
 	}
 	
-	public static class ChannelInboundHandlerWrapper {
-		
-		private Constructor<? extends ChannelInboundHandlerAdapter> handlerConstructor;
-		
-		public Object hadlerParameter;
-
-		public Constructor<? extends ChannelInboundHandlerAdapter> getHandlerConstructor() {
-			return handlerConstructor;
-		}
-
-		public void setHandlerConstructor(Constructor<? extends ChannelInboundHandlerAdapter> handlerConstructor) {
-			this.handlerConstructor = handlerConstructor;
-		}
-
-		public Object getHadlerParameter() {
-			return hadlerParameter;
-		}
-
-		public void setHadlerParameter(Object hadlerParameter) {
-			this.hadlerParameter = hadlerParameter;
-		}
-		
-	}
 }

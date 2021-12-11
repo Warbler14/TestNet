@@ -5,6 +5,7 @@ import java.lang.reflect.Constructor;
 import com.lotus.jewel.client.Client;
 import com.lotus.jewel.client.handler.EchoClientHandler;
 import com.lotus.jewel.client.impl.NettyClientWithChannelFutureListener;
+import com.lotus.jewel.wrapper.ClassConstructorWrapper;
 
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -16,12 +17,22 @@ public class EchoClientWithNettyClientWithChannelFutureListenerRun {
 		String ipAddress = "127.0.0.1";
 		int port = 8888;
 		
+		Client client = new NettyClientWithChannelFutureListener<ChannelInboundHandlerAdapter>(ipAddress, port, getEchoClientHandlerWrapper());
+		client.start();
+	}
+	
+	private static ClassConstructorWrapper<ChannelInboundHandlerAdapter> getEchoClientHandlerWrapper() 
+			throws Exception {
 		Constructor<? extends ChannelInboundHandlerAdapter> handlerConstructor
 			= EchoClientHandler.class.getConstructor(new Class[]{String.class});
-
-		String channelActiveMessage = "Channel Active 🐧";
 		
-		Client client = new NettyClientWithChannelFutureListener(ipAddress, port, handlerConstructor, channelActiveMessage);
-		client.start();
+		String channelActiveMessage = "Channel Active 🐧";
+
+		ClassConstructorWrapper<ChannelInboundHandlerAdapter> wrapper 
+			= new ClassConstructorWrapper<ChannelInboundHandlerAdapter>();
+		wrapper.setConstructor(handlerConstructor);
+		wrapper.setParameter(channelActiveMessage);
+
+		return wrapper;
 	}
 }

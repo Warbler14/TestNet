@@ -1,12 +1,12 @@
 package com.lotus.jewel.server.impl;
 
-import java.lang.reflect.Constructor;
 import java.net.InetSocketAddress;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.lotus.jewel.server.Server;
+import com.lotus.jewel.wrapper.ClassConstructorWrapper;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -18,7 +18,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.concurrent.Future;
 
-public class NettyServer implements Server{
+public class NettyServer <CIHA extends ChannelInboundHandlerAdapter> implements Server{
 	
 	final static Logger logger = LoggerFactory.getLogger(NettyServer.class);
 
@@ -26,22 +26,18 @@ public class NettyServer implements Server{
 	
 	private EventLoopGroup group;
 	
-	private Constructor<? extends ChannelInboundHandlerAdapter> handlerConstructor;
+	private ClassConstructorWrapper<CIHA> handlerWrapper;
 	
-	public Object hadlerParameter;
-	 
     public NettyServer(final int port
-    		, Constructor<? extends ChannelInboundHandlerAdapter> handlerConstructor
-    		, Object hadlerParameter) {
+    		, ClassConstructorWrapper<CIHA> handlerWrapper) {
         
     	this.port = port;
-        this.handlerConstructor = handlerConstructor;
-        this.hadlerParameter = hadlerParameter;
+        this.handlerWrapper = handlerWrapper;
     }
     
     public void start() throws Exception {
-    	if(handlerConstructor == null) {
-    		throw new Exception("handlers is null");
+    	if(handlerWrapper == null) {
+    		throw new Exception("handlerWrapper is null");
     	}
     	
         group = new NioEventLoopGroup(); // EventLoopGroup 생성
@@ -55,9 +51,10 @@ public class NettyServer implements Server{
                         @Override
                         protected void initChannel(SocketChannel channel) throws Exception {
                         	// EchoServerHandler 하나를 채널의 Channel Pipeline 으로 추가
-                            //channel.pipeline().addLast(handler);
-                        	
-                            channel.pipeline().addLast(handlerConstructor.newInstance(hadlerParameter));
+                        	CIHA adapter = handlerWrapper.getInstance();
+                        	if(adapter != null) {       			
+                    			channel.pipeline().addLast(adapter);
+                    		}
                         }
                     });
             
